@@ -1,0 +1,110 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[51]:
+
+
+import cv2
+import os
+import pytesseract as te
+import numpy as np
+import matplotlib.pyplot as plt
+get_ipython().run_line_magic('matplotlib', 'inline')
+
+
+# In[52]:
+
+
+path="C:\\Users\\Admin\\Downloads\\pic\\plate.jpg"
+image=cv2.imread(path)
+gray=cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
+#cv2.imshow("qw",gray)
+#cv2.waitKey(0)
+
+
+# In[53]:
+
+
+blur=cv2.bilateralFilter(gray,11,50,90)
+#cv2.imshow("qw",blur)
+#cv2.waitKey(0)
+
+
+# In[54]:
+
+
+edges=cv2.Canny(blur,30,100)
+#cv2.imshow("qw",edges)
+#cv2.waitKey(0)
+
+
+# In[55]:
+
+
+cnts,new=cv2.findContours(edges.copy(),cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)
+image_copy=image.copy()
+_=cv2.drawContours(image_copy,cnts,-1,(255,0,0),1)
+#cv2.waitKey(0)
+
+
+# In[56]:
+
+
+cnts=sorted(cnts,key=cv2.contourArea,reverse=True)[:30]
+
+
+# In[57]:
+
+
+image_copy=image.copy()
+_=cv2.drawContours(image_copy,cnts,-1,(255,0,0),1)
+#cv2.imshow("qw",image_copy)
+#cv2.waitKey(0)
+
+
+# In[58]:
+
+
+plate=None
+for c in cnts:
+    perimeter=cv2.arcLength(c,True)
+    edges_count=cv2.approxPolyDP(c,0.02*perimeter,True)
+    if(len(edges_count)==4):
+        x,y,w,h=cv2.boundingRect(c)
+        plate=image[y:y+h,x:x+w]
+        break
+cv2.imwrite("C:\\Users\\Admin\\Downloads\\pic\\plate.png",plate)
+
+        
+
+
+# In[59]:
+
+
+import pytesseract
+
+pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+pla=cv2.cvtColor(plate,cv2.COLOR_BGR2GRAY)
+text=pytesseract.image_to_string(pla, lang="eng")
+
+
+#print(len(text))
+
+
+# In[60]:
+
+
+print(text)
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
